@@ -16,7 +16,7 @@
 		"helmet": "^3.23.3",
 		"mocha": "^3.2.0",
 		"mongodb": "^2.2.16",
-		"mongoose": "^5.9.27",
+		"mongoose": "^5.9.28",
 		"zombie": "^5.0.5"
 	},
 	"engines": {
