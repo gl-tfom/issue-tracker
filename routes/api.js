@@ -13,7 +13,7 @@ var MongoClient = require('mongodb');
 var ObjectId = require('mongodb').ObjectID;
 const mongoose = require('mongoose');
 mongoose.set('useUnifiedTopology', true);
-const dburl = process.env.MONGOLAB_URI
+const dburl = process.env.MONGOLAB_URI;
 var Schema = mongoose.Schema;
 
 const issueSchema = new Schema({
@@ -32,7 +32,8 @@ module.exports = function (app) {
   app.route('/api/issues/:project')
   
     .get(async function (req, res) {
-      mongoose.connect(dburl, {useNewUrlParser: true});
+      mongoose.connect(dburl, {useNewUrlParser: true})
+        .catch(err => err);
 
       const db = mongoose.connection;
       db.on('error', console.error.bind(console, 'connection error:'));
@@ -59,7 +60,8 @@ module.exports = function (app) {
     })
     
     .post(async function (req, res){
-      mongoose.connect(dburl, {useNewUrlParser: true});
+      mongoose.connect(dburl, {useNewUrlParser: true})
+      .catch(err => err);
       
       const db = mongoose.connection;
       db.on('error', console.error.bind(console, 'connection error:'));
@@ -99,7 +101,8 @@ module.exports = function (app) {
     })
     
     .put(async function (req, res){
-      mongoose.connect(dburl, {useNewUrlParser: true});
+      mongoose.connect(dburl, {useNewUrlParser: true})
+      .catch(err => err);
 
       const db = mongoose.connection;
       db.on('error', console.error.bind(console, 'connection error:'));
@@ -147,7 +150,8 @@ module.exports = function (app) {
     })
     
     .delete(async function (req, res){
-      mongoose.connect(dburl, {useNewUrlParser: true});
+      mongoose.connect(dburl, {useNewUrlParser: true})
+      .catch(err => err);
 
       const db = mongoose.connection;
       db.on('error', console.error.bind(console, 'connection error:'));
