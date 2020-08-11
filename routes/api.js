@@ -13,7 +13,7 @@ var MongoClient = require('mongodb');
 var ObjectId = require('mongodb').ObjectID;
 const mongoose = require('mongoose');
 mongoose.set('useUnifiedTopology', true);
-const dburl = process.env.MONGOLAB_URI;
+const dburl = process.env.MONGODB_URI;
 var Schema = mongoose.Schema;
 
 const issueSchema = new Schema({
