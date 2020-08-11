@@ -3,21 +3,264 @@
   padding: 0px;
 }
 
-body {
-  padding: 10px;
+html {
+  background: linear-gradient(-15deg, #666, transparent);
+}
+
+html, body {
+  width: 100vw;
+  min-height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  margin: 2rem;
+}
+
+.container header {
+  align-self: center;
+  flex: 1;
+}
+
+#userstories {
+  font-size: 1.1rem;
+  margin: 1rem .5rem;
+}
+
+#userstories h2 {
+  font-size: 1.5rem;
+  justify-self: center;
+}
+
+#testui {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+}
+
+#testui h2 {
+  flex: 1 1 100%;
+  align-self: center;
+  margin-bottom: 1.5em;
+}
+
+.issue_form {
+  box-sizing: border-box;
+  flex: 2 1 50%;
+  display: flex;
+  flex-direction: column;
+  margin: .5em .5em 0 0;
+}
+
+form {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  border: 2px solid #111;
+}
+
+form input, label {
+  flex: 3 2 30%;
+  height: auto;
+  min-height: 2.5rem;
+}
+
+form label {
+  display: inline-flex;
+  flex: 2 1 auto;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #111;
+}
+
+form label input {
+  display: block;
+  margin: 0 auto;
+  width: 1.5rem;
+}
+
+form label input[type="checkbox"] {
+  display: block;
+  max-width: 1.5rem;
+  min-width: 1.5rem;
+  margin: 0 .5rem 0 0;
+  position: relative;
+}
+
+form textarea, form input, form label {
+  font-size: 1.1rem;
+}
+
+form textarea, form input {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  color: hsl(0, 52%, 29%);
+}
+
+form textarea {
+  flex: 2 1 100%;
+  height: 1.85rem;
+}
+
+form textarea {
+  font-size: 1.25rem;
+  font-family: auto;
+  font-weight: 600;
+  padding-top: .25rem;
+  padding-bottom: .25rem;
+}
+
+form button {
+  flex: 2 1 auto;
+  min-width: 50%;
+  min-height: 2.5rem;
+  justify-self: center;
+  font-size: 1.1rem;
+  font-family: fantasy;
+  color: salmon;
+  background: #444;
+  transition: border-color .2s, color .2s, background-color .2s;
+}
+
+form button:hover {
+  background-color: salmon;
+  color: black;
+  border-color: black;
+}
+
+.update {
+  margin-top: 2rem;
+  order: 3;
+  flex: 1 1 100%;
+}
+
+.post {
+  margin-bottom: 2rem;
+  order: 1;
+  flex: 2 1 50%;
+}
+
+.del {
+  order: 2;
+  flex: 2 1 auto;
+}
+
+code {
+  overflow-wrap: anywhere;
+}
+
+#jsonResult {
+  display: none;
+}
+
+/* {Project} issues styles */
+center {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#submitNewIssue, #issueDisplay {
+  flex: 1 1 100%;
+}
+
+#newIssue {
+  width: 80%;
 }
 
 .issue {
   margin: 20px;
   padding: 5px;
-  width: 60%;
+  width: 80%;
   border: 2px solid black;
-}
-
-.closed {
-  background-color: lightgrey;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  background: #444;
+  color: white;
 }
 
 .id {
-  font-size: 10.5px;
+  flex: 2 1 25%;
+  color: salmon;
+  font-size: .85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.title {
+  flex: 3 1 auto;
+  font-size: 1.35rem;
+  display: flex;
+  justify-content: center;
+}
+
+.text {
+  flex: 1 1 100%;
+  font-size: 1rem;
+}
+
+.status {
+  flex: 1 1 100%;
+  color: plum;
+  font-size: 1rem;
+}
+
+.createdby {
+  flex: 2 1 auto;
+  display: flex;
+  justify-content: end;
+}
+
+.createdon {
+  flex: 2 1 auto
+}
+
+.closeIssue, .deleteIssue {
+  color: plum;
+}
+
+.closed {
+  opacity: .2;
+}
+
+@media only screen and (min-width: 600px) {
+
+  form input, label {
+    flex: 3 2 30%;
+  }
+
+  form textarea, form input {
+    min-height: 2.5rem;
+  }
+
+  #submitNewIssue h3 {
+    font-size: 1.5rem;
+  }
+
+  #newIssue {
+    width: 60%;
+    max-width: 750px;
+  }
+
+  .issue {
+    width: 60%;
+  }  
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .text {
+    font-size: 1.25rem;
+  }
+  
+  .status {
+    font-size: 1.25rem;
+  }
 }
