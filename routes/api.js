@@ -5,16 +5,12 @@
 *
 *
 */
-
 'use strict';
 
-var expect = require('chai').expect;
-var MongoClient = require('mongodb');
-var ObjectId = require('mongodb').ObjectID;
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 mongoose.set('useUnifiedTopology', true);
-const dburl = process.env.MONGODB_URI;
-var Schema = mongoose.Schema;
+const connstr = `mongodb+srv://${process.env.USER}:${process.env.PW}@${encodeURIComponent(process.env.HOST)}/${encodeURIComponent(process.env.DB)}?retryWrites=true&w=majority`;
 
 const issueSchema = new Schema({
   issue_title: String,
@@ -27,162 +23,146 @@ const issueSchema = new Schema({
   status_text: String
 });
 
+const options = {useNewUrlParser: true, useFindAndModify: false};
+
+var dbConnection;
+
+const connectToDb = () => {
+  if (!dbConnection) {
+    dbConnection = mongoose.connect(connstr, options)
+      .then((db) => db)
+      .catch(err => console.log('error while connecting to db'));
+  }
+  return dbConnection;
+};
+
 module.exports = function (app) {
 
   app.route('/api/issues/:project')
   
-    .get(async function (req, res) {
-      mongoose.connect(dburl, {useNewUrlParser: true})
-        .catch(err => err);
-
-      const db = mongoose.connection;
-      db.on('error', console.error.bind(console, 'connection error:'));
-      db.once('open', () => {
-        console.log("connected to db!");
-      });
-
+    .get(async function (req, res, next) {
       const query = req.query;
       const project = req.params.project;
 
-      const issue = mongoose.model('issues_tracker', issueSchema, project);
-      
-      const results = await issue
-        .find(query)
-        .then(data => data)
-        .catch(err => {
-          console.log(err);
-          res.sendStatus(500);
+      connectToDb()
+        .then(async (data) => {
+          const issue = mongoose.model(project, issueSchema, project);
+          const results = await issue
+            .find(query)
+            .then(data => data)
+            .catch(err => {
+              console.log(err);
+              res.send('failed to retreive data');
+              return;
+            });
+          res.json(results);
           return;
         })
-        .finally(() => db.close());
-      res.json(results);
-      return;
+        .catch(next);
     })
     
-    .post(async function (req, res){
-      mongoose.connect(dburl, {useNewUrlParser: true})
-      .catch(err => err);
-      
-      const db = mongoose.connection;
-      db.on('error', console.error.bind(console, 'connection error:'));
-      db.once('open', () => {
-        console.log("connected to db!");
-      });
+    .post(async function (req, res, next){
+      var project = req.params.project;
+      // missing required fields
       if (req.body.issue_title == '' || req.body.issue_text == '' || req.body.created_by == '') {
         res.send('Missing required fields');
         return;
       }
-      var project = req.params.project;
-      const issue = mongoose.model('issues_tracker', issueSchema, project);
-      // req.body holds all form data passed to path
-      
-      const new_issue = new issue({
-        issue_title: req.body.issue_title,
-        issue_text: req.body.issue_text,
-        created_on: new Date(),
-        updated_on: new Date(),
-        created_by: req.body.created_by,
-        assigned_to: req.body.assigned_to ? req.body.assigned_to : '',
-        open: true,
-        status_text: req.body.status_text ? req.body.status_text : ''
-      });
+      connectToDb()
+        .then(async(data) => {
+          const issue = mongoose.model(project, issueSchema, project);
 
-      new_issue.save()
-        .then((item) => console.log(item + ' added to db!'))
-        .catch(err =>  { 
-          console.log(err);
-          res.sendStatus(500);
+          const new_issue = new issue({
+            issue_title: req.body.issue_title,
+            issue_text: req.body.issue_text,
+            created_on: new Date(),
+            updated_on: new Date(),
+            created_by: req.body.created_by,
+            assigned_to: req.body.assigned_to ? req.body.assigned_to : '',
+            open: true,
+            status_text: req.body.status_text ? req.body.status_text : ''
+          });
+
+          new_issue.save()
+            .then((item) => item)
+            .catch(err =>  { 
+              console.log(err);
+              res.send('Failed to save record to db');
+              return;
+            });
+
+          res.json(new_issue);
           return;
         })
-        .finally(() => db.close());
-
-      res.json(new_issue);
-      return;
+        .catch(next);
     })
     
-    .put(async function (req, res){
-      mongoose.connect(dburl, {useNewUrlParser: true})
-      .catch(err => err);
-
-      const db = mongoose.connection;
-      db.on('error', console.error.bind(console, 'connection error:'));
-      db.once('open', () => {
-        console.log("connected to db!");
-      });
-      // needs id to find specific issue to update
-      //  Returned will be 'successfully updated' or 'could not update '+_id. This should always update updated_on. If no fields are sent return 'no updated field sent
+    .put(async function (req, res, next){
       var project = req.params.project;
-      const issue_model = mongoose.model('issues_tracker', issueSchema, project);
-      // const issue = new issue_model();
-      const id = req.body._id ? req.body._id : '';
-      const body_arr = Object.values(req.body);
-      const valid_items = body_arr.filter((item) => item != '').length > 1 ? true : false;
-      if (valid_items == false) {
-        res.send('no updated field sent');
-        return;
-      }
-      let update_info = {updated_on: new Date()};
-      for (const item in req.body) {
-        if (item != '_id') {
-          update_info = {...update_info, [item]: req.body[item]};
-        }
-      }
+      connectToDb()
+        .then(async (data) => {
+          const issue_model = mongoose.model(project, issueSchema, project);
+          // const issue = new issue_model();
+          const id = req.body._id ? req.body._id : '';
+          const body_arr = Object.values(req.body);
+          const valid_items = body_arr.filter((item) => item != '').length > 1 ? true : false;
+          if (valid_items == false) {
+            res.send('no updated field sent');
+            return;
+          }
+          let update_info = {updated_on: new Date()};
+          for (const item in req.body) {
+            if (item != '_id') {
+              update_info = {...update_info, [item]: req.body[item]};
+            }
+          }
+          const updatedItem = await issue_model
+            .findByIdAndUpdate({_id: id}, update_info)
+            .then(item => {
+              if (item != undefined) {
+                res.send('successfully updated!');
+              }
+            })
+            .catch(err => {
+              console.log(err);
+              res.send('could not update ' + id);
+              return;
+            });
 
-      // console.log('update info is: ' + JSON.stringify(update_info));
+          res.send(updatedItem);
+          return;
+        })
+        .catch(next);
+    })
+    
+    .delete(async function (req, res, next){
+      var project = req.params.project;
 
-      const updatedItem = await issue_model
-        .findByIdAndUpdate({_id: id}, update_info)
-        .then(item => {
-          if (item != undefined) {
-            console.log(`added ${item} to database`);
-            res.send('successfully updated!');
+      connectToDb()
+        .then(async (data) => {
+          const issue_model = mongoose.model(project, issueSchema, project);
+          //  If no _id is sent return '_id error', success: 'deleted '+_id, failed: 'could not delete '+_id.
+          const id = req.body._id ? req.body._id : ''
+          if (id == '') {
+            res.send('_id error');
+            return;
+          } else {
+            const deletedItem = await issue_model
+              .findByIdAndDelete(id)
+              .then(item => {
+                if (item != null) {
+                  return 'success: deleted ' + id
+                }
+              })
+              .catch(err => {
+                console.log(err);
+                return 'could not delete ' + id;
+              });
+
+            res.send(deletedItem);
+            return;
           }
         })
-        .catch(err => {
-          console.log(err);
-          res.send('could not update ' + id);
-          return;
-        })
-        .finally(() => db.close());
-
-      res.send(updatedItem);
-      return;
-    })
-    
-    .delete(async function (req, res){
-      mongoose.connect(dburl, {useNewUrlParser: true})
-      .catch(err => err);
-
-      const db = mongoose.connection;
-      db.on('error', console.error.bind(console, 'connection error:'));
-      db.once('open', () => {
-        console.log("connected to db!");
-      });
-      var project = req.params.project;
-      const issue_model = mongoose.model('issues_tracker', issueSchema, project);
-      //  If no _id is sent return '_id error', success: 'deleted '+_id, failed: 'could not delete '+_id.
-      const id = req.body._id ? req.body._id : ''
-      if (id == '') {
-        res.send('_id error');
-        return;
-      } else {
-        const deletedItem = await issue_model
-          .findByIdAndDelete(id)
-          .then(item => {
-            if (item != null) {
-              // console.log('deleted ' + item);
-              return 'success: deleted ' + id
-            }
-          })
-          .catch(err => {
-            console.log(err);
-            return 'could not delete ' + id;
-          })
-          .finally(() => db.close());
-
-        res.send(deletedItem);
-        return;
-      }
+        .catch(next)
     });
-    mongoose.connection.on('close', () => console.log('db conn closed'));
 };

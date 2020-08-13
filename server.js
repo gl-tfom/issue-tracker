@@ -1,11 +1,10 @@
 'use strict';
-require('dotenv').config()
 
 var express     = require('express');
 var bodyParser  = require('body-parser');
 var expect      = require('chai').expect;
 var cors        = require('cors');
-const helmet = require('helmet');
+var helmet      = require('helmet');
 
 var apiRoutes         = require('./routes/api.js');
 var fccTestingRoutes  = require('./routes/fcctesting.js');
@@ -15,6 +14,13 @@ var app = express();
 // use helmet to add more security options
 app.use(helmet());
 app.use(helmet.noSniff());
+// this breaks my code, manifest.json didnt solve it. work on a solution tomorrow
+app.use(helmet.contentSecurityPolicy({
+  directives:{
+    defaultSrc:["'self'"],
+    scriptSrc:["'self'", 'code.jquery.com']
+  }
+}));
 app.use(helmet.xssFilter());
 
 app.use('/public', express.static(process.cwd() + '/public'));

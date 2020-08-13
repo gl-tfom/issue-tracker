@@ -16,7 +16,8 @@ html, body {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  margin: 2rem;
+  margin: 2rem auto;
+  width: 80%;
 }
 
 .container header {
@@ -157,6 +158,14 @@ code {
   display: none;
 }
 
+.midline {
+  margin: 25px 0
+}
+
+.bottomline {
+  margin: 100px 25px 0;
+}
+
 /* {Project} issues styles */
 center {
   display: flex;
@@ -174,7 +183,7 @@ center {
 
 .issue {
   margin: 20px;
-  padding: 5px;
+  padding: .5rem;
   width: 80%;
   border: 2px solid black;
   display: flex;
@@ -195,17 +204,19 @@ center {
 
 .title {
   flex: 3 1 auto;
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   display: flex;
   justify-content: center;
 }
 
 .text {
+  padding: .25rem 0;
   flex: 1 1 100%;
   font-size: 1rem;
 }
 
 .status {
+  padding: .25rem 0;
   flex: 1 1 100%;
   color: plum;
   font-size: 1rem;

@@ -14,10 +14,10 @@ var server = require('../server');
 chai.use(chaiHttp);
 
 suite('Functional Tests', function() {
+    
+    let ids_for_later = [];
   
     suite('POST /api/issues/{project} => object with issue data', function() {
-      
-      ids_for_later = []
 
       test('Every field filled in', function(done) {
        chai.request(server)
@@ -105,7 +105,7 @@ suite('Functional Tests', function() {
         chai.request(server)
           .put('/api/issues/test')
           .send({
-            _id: '5f2f71dbcbbe30328c1781f1',
+            _id: ids_for_later[0],
             issue_title: 'Update this one field',
           })
           .end(function(err, res){
@@ -119,7 +119,7 @@ suite('Functional Tests', function() {
         chai.request(server)
           .put('/api/issues/test')
           .send({
-            _id: '5f2f71dbcbbe30328c1781f1',
+            _id: ids_for_later[1],
             issue_title: 'Update this field',
             issue_text: 'this field as well',
             assigned_to: 'Jim',
@@ -158,11 +158,11 @@ suite('Functional Tests', function() {
       test('One filter', function(done) {
         chai.request(server)
         .get('/api/issues/test')
-        .query({ issue_text: 'hello there' })
+        .query({ created_by: "Functional Test - Every field filled in" })
         .end(function(err, res){
           assert.equal(res.status, 200);
           assert.isArray(res.body);
-          assert.lengthOf(res.body, 2, '2 issues with text == "hello there"');
+          assert.lengthOf(res.body, 4, '4 issues with created_by == "Functional Test - Every field filled in"');
           assert.property(res.body[0], 'issue_title');
           assert.property(res.body[0], 'issue_text');
           assert.property(res.body[0], 'created_on');
@@ -188,7 +188,7 @@ suite('Functional Tests', function() {
       test('Multiple filters (test for multiple fields you know will be in the db for a return)', function(done) {
         chai.request(server)
         .get('/api/issues/test')
-        .query({ issue_text: 'hello there', status_text: 'In QA' })
+        .query({ created_by: "Functional Test - Every field filled in", assigned_to: "Sam" })
         .end(function(err, res){
           assert.equal(res.status, 200);
           assert.isArray(res.body);
@@ -201,8 +201,8 @@ suite('Functional Tests', function() {
           assert.property(res.body[0], 'open');
           assert.property(res.body[0], 'status_text');
           assert.property(res.body[0], '_id');
-          assert.equal(res.body[0].issue_title, 'Beep boop');
-          assert.equal(res.body[0].created_by, "Sam");
+          assert.equal(res.body[0].issue_title, 'Title');
+          assert.equal(res.body[0].assigned_to, "Sam");
           done();
         });
       });
@@ -233,7 +233,6 @@ suite('Functional Tests', function() {
         })
         .end(function(err, res){
           if (err) console.log(err);
-          console.log(res.text);
           assert.equal(res.status, 200);
           assert.equal(res.text, `success: deleted ${ids_for_later[0]}`);
           done();
@@ -247,7 +246,6 @@ suite('Functional Tests', function() {
         })
         .end(function(err, res){
           if (err) console.log(err);
-          console.log(res.text);
           assert.equal(res.status, 200);
           assert.equal(res.text, `success: deleted ${ids_for_later[1]}`);
           done();
